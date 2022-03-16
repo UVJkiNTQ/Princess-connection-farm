@@ -115,6 +115,7 @@ class TanSuoInfoBox(FightInfoBase):
     def tiaozhan(self, team_order):
         T = self.goto_tiaozhan()
         T.select_team(team_order)
+        T.get_zhiyuan(if_full=2, zhiyuan_sort="atk")
         F = T.goto_fight()
         F.set_auto(1)
         F.set_speed(1)
