@@ -118,7 +118,7 @@ class TanSuoInfoBox(FightInfoBase):
         T.get_zhiyuan(if_full=2, zhiyuan_sort="atk")
         F = T.goto_fight()
         F.set_auto(1)
-        F.set_speed(1)
+        F.set_speed(2, max_level=2)
         D = F.get_during()
         while True:
             time.sleep(1)
