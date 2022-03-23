@@ -1855,6 +1855,7 @@ class ShuatuMixin(ShuatuBaseMixin):
             return
         map_base = HuodongMapBase(self)
         jiaohuan = map_base.goto_menu().goto_jiaohuan()
+        jiaohuan.setting()
         jiaohuan.exchange_all()
         self.lock_home()
 

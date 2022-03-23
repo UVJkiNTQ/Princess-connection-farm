@@ -358,6 +358,7 @@ class Jiaohuan(PCRSceneBase):
                     self.click_btn(HUODONG_BTN["return"], until_appear=HUODONG_BTN["dangqianliebiao"])
                 # TODO:多周目扩充
                 # self.lock_img(HUODONG_BTN["return"])
+                time.sleep(2)
                 pass
             elif a <= 10:
                 self.lock_img(HUODONG_BTN["return"])
