@@ -23,28 +23,28 @@ class ClanBattleMAP(SevenBTNMixin):
         if self.is_exists(HANGHUI_BTN["kkr_dialog"], screen=screen):
             self.click(160, 100)
             self.click(160, 100)
-        if self.is_exists(HANGHUI_BTN["kkr_dialog2"], screen=screen):
-            self.click(160, 100)
-            self.click(160, 100)
+        # if self.is_exists(HANGHUI_BTN["kkr_dialog2"], screen=screen):
+        #     self.click(160, 100)
+        #     self.click(160, 100)
         if self.is_exists(HANGHUI_BTN["sudu"]):  # 战斗速度上限设定（关闭）
             self.click(349, 282)
             time.sleep(1)
             self.click(479, 365)
         return screen
 
-    def goto_battlepre(self):   # 点击进入BOSS
+    def goto_battlepre(self) -> "ClanBattlePre":   # 点击进入BOSS
         time.sleep(5)
         screen = self.getscreen()
         r = self.img_where_all(img="img/hanghui/battle/boss_lp.bmp", threshold=0.5, at=(13, 133, 916, 379), )
         if not r:
             self.log.write_log("info", "未识别到BOSS，可能不在公会战期间")
-            return False
+            return
         else:
             x = r[0]
             y = r[1]
             x1 = int(x) + 77
             y1 = int(y) - 43
-            return self.goto(ClanBattleBianzu, self.fun_click(x1, y1))
+            return self.goto(ClanBattlePre, self.fun_click(x1, y1))
 
     def get_cishu(self):
         a = self.ocr_int(549, 395, 569, 415)
@@ -69,9 +69,10 @@ class ClanBattlePre(ClanBattleMAP):
         if self.is_exists(HANGHUI_BTN["kkr_dialog"], screen=screen):
             self.click(160, 100)
             self.click(160, 100)
-        if self.is_exists(HANGHUI_BTN["kkr_dialog2"], screen=screen):
-            self.click(160, 100)
-            self.click(160, 100)
+        # if self.is_exists(HANGHUI_BTN["kkr_dialog2"], screen=screen):
+        #     self.click(160, 100)
+        #     self.click(160, 100)
+        return screen
 
     def make_formal(self):
         self.lock_img(HANGHUI_BTN["monizhan_unselected"], elseclick=(862, 104))
@@ -91,6 +92,7 @@ class ClanBattleBianzu(ClanBattleMAP):  # 公会战编组
         if self.is_exists(HANGHUI_BTN["kkr_dialog"], screen=screen):
             self.click(160, 100)
             self.click(160, 100)
+        return screen
 
     def select_by_sort(self, order="zhanli", change=2):
         """
@@ -217,4 +219,3 @@ class ClanBattleBianzu(ClanBattleMAP):  # 公会战编组
             out = 3
         self.click_btn(DXC_ELEMENT["quanbu_white"], until_appear=DXC_ELEMENT["quanbu_blue"], elsedelay=0.1)
         return out
-

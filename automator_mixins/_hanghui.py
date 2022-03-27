@@ -133,27 +133,27 @@ class HanghuiMixin(ToolsMixin):
         self.lock_img('img/ok.bmp', ifclick=[(591, 440)], ifdelay=1)  # 点击ok
         self.lock_img('img/liwu.bmp', elseclick=[(131, 533), (1, 1)], elsedelay=0.5, at=(891, 413, 930, 452))  # 回首页
 
-    # def joinhanghui(self, clubname):  # 小号加入行会
-    #     # 应该废弃了
-    #     self.log.write_log('waring',"此功能或许已经废弃，转另一个版本")
-    #     self.log.write_log('info','>>>>>>>即将加入公会名为：', clubname, '<<<<<<<')
-    #     self.click(693, 430)  # 点击行会
-    #     self.lock_img('img/zujianhanghui.bmp', elseclick=[(1, 1)], alldelay=0.5)  # 锁定行会界面
-    #     time.sleep(1)
-    #     self.lock_img('img/zujianhanghui.bmp', elseclick=[(1, 1)], alldelay=0.5)  # 锁定行会界面
-    #     self.click(860, 79)  # 点击设定
-    #     self.lock_img('img/quxiao2.jpg', ifclick=[(477, 177)], ifdelay=1)  # 点击输入框
-    #     self.d.send_keys(clubname)
-    #     time.sleep(1)
-    #     self.click(1, 1)
-    #     time.sleep(1)
-    #     self.click(587, 432)
-    #     time.sleep(5)
-    #     self.click(720, 172)
-    #     time.sleep(1)
-    #     self.lock_img('img/jiaru.bmp', ifclick=[(839, 443)], ifdelay=1)  # 点击加入
-    #     self.lock_img('img/ok.jpg', ifclick=[(597, 372)], ifdelay=1)  # 点击ok
-    #     self.lock_img('img/liwu.bmp', elseclick=[(131, 533), (1, 1)], elsedelay=0.5, at=(891, 413, 930, 452))  # 回首页
+    def joinhanghui(self, clubname):  # 小号加入行会
+        # 应该废弃了
+        self.log.write_log('waring',"此功能或许已经废弃，转另一个版本")
+        self.log.write_log('info','>>>>>>>即将加入公会名为：', clubname, '<<<<<<<')
+        self.click(693, 430)  # 点击行会
+        self.lock_img('img/zujianhanghui.bmp', elseclick=[(1, 1)], alldelay=0.5)  # 锁定行会界面
+        time.sleep(1)
+        self.lock_img('img/zujianhanghui.bmp', elseclick=[(1, 1)], alldelay=0.5)  # 锁定行会界面
+        self.click(860, 79)  # 点击设定
+        self.lock_img('img/quxiao2.jpg', ifclick=[(477, 177)], ifdelay=1)  # 点击输入框
+        self.d.send_keys(clubname)
+        time.sleep(1)
+        self.click(1, 1)
+        time.sleep(1)
+        self.click(587, 432)
+        time.sleep(5)
+        self.click(720, 172)
+        time.sleep(1)
+        self.lock_img('img/jiaru.bmp', ifclick=[(839, 443)], ifdelay=1)  # 点击加入
+        self.lock_img('img/ok.jpg', ifclick=[(597, 372)], ifdelay=1)  # 点击ok
+        self.lock_img('img/liwu.bmp', elseclick=[(131, 533), (1, 1)], elsedelay=0.5, at=(891, 413, 930, 452))  # 回首页
 
     def join_hanghui(self, clubname):
         # 2021-8-11 CyiceK修了点bug
@@ -453,24 +453,36 @@ class HanghuiMixin(ToolsMixin):
             if self.lock_img(img=TUANDUIZHAN_BTN["taofaxinxi"], elsedelay=2, elseclick=(1, 1),
                              side_check=self.juqing_kkr):
                 time.sleep(5 + self.change_time)
-                try:
-                    self.lock_img(img=TUANDUIZHAN_BTN["taofaxinxi"], elsedelay=2, elseclick=(1, 1),
-                                  side_check=self.juqing_kkr)
-                    screen = self.getscreen()
-                    cbm = ClanBattleMAP(self).enter()
-                    cbm.goto_battlepre()
-                    break
-                except Exception as e:
-                    pcr_log(self.account).write_log("info", f"识别不到boss信息，已退出本任务")
-                    return
+                # try:
+                #     self.lock_img(img=TUANDUIZHAN_BTN["taofaxinxi"], elsedelay=2, elseclick=(1, 1),
+                #                   side_check=self.juqing_kkr)
+                #     screen = self.getscreen()
+                #     r_list = self.img_where_all(img=TUANDUIZHAN_BTN["shangbiao"], screen=screen)
+                #     if self.lock_img(img=TUANDUIZHAN_BTN["tiaozhan"], elseclick=(int(r_list[0]), int(r_list[1])),
+                #                      side_check=self.juqing_kkr, retry=5):
+                #         if self.is_exists(TUANDUIZHAN_BTN["tiaozhan"]):
+                #             break
+                #     else:
+                #         # if看看是不是延迟太高导致的
+                #         if not self.is_exists(img=TUANDUIZHAN_BTN["tiaozhan"]):
+                #             self.click(1, 1)
+                # except Exception as e:
+                #     pcr_log(self.account).write_log("info", f"识别不到boss信息，已退出本任务")
+                #     return
+                cbm = ClanBattleMAP(self)
+                cbm.goto_battlepre()
+                self.clear_all_prechecks()
+                break
+                # except Exception as e:
+                #     pcr_log(self.account).write_log("info", f"识别不到boss信息，已退出本任务")
+                #     return
             else:
-                self.fclick(1, 1)
                 continue
 
         def tiaozhan() -> bool:
             # 非主流写法，内部方法
             while True:
-                self.lock_img(TUANDUIZHAN_BTN["tiaozhan"], ifclick=[(833, 462)], side_check=self.juqing_kkr, retry=3)
+                self.lock_img(HANGHUI_BTN["tiaozhan"], ifclick=[(833, 462)], side_check=self.juqing_kkr, retry=3)
                 self.lock_img(DXC_ELEMENT["sheding"], ifclick=(478, 443), retry=3)
                 if self.is_exists(TUANDUIZHAN_BTN["guanbi"]):
                     self.click(TUANDUIZHAN_BTN["guanbi"])
@@ -504,9 +516,9 @@ class HanghuiMixin(ToolsMixin):
             if not state:
                 return
             # 战斗开始
-            self.click_btn(DXC_ELEMENT["zhandoukaishi"], until_disappear=DXC_ELEMENT["zhandoukaishi"], elsedelay=0.1,
+            self.click_btn(DXC_ELEMENT["zhandoukaishi"], until_disappear=DXC_ELEMENT["zhandoukaishi"], elsedelay=1,
                            retry=4)
-
+            time.sleep(1)
             if self.lock_img(TUANDUIZHAN_BTN["zhandou"], retry=7):
                 # 战斗
                 self.lock_no_img(TUANDUIZHAN_BTN["zhandou"], elseclick=(587, 374))
@@ -518,10 +530,10 @@ class HanghuiMixin(ToolsMixin):
 
         while True:
             if self.lock_img('img/caidan.jpg', elseclick=[(1, 1)], retry=3):
-                self.lock_img('img/auto_1.jpg', elseclick=[(914, 425)], elsedelay=0.2, retry=3)
+                self.lock_img('img/fight/auto_on.bmp', elseclick=[(914, 425)], elsedelay=0.2, retry=3)
                 self.lock_img('img/kuaijin_1.jpg', elseclick=[(913, 494)], elsedelay=0.2, retry=3)
-            if self.is_exists('img/shanghaibaogao.jpg', at=(767, 18, 948, 65)) and \
-                    self.is_exists('img/xiayibu.jpg', at=(694, 474, 920, 535)):
-                self.lock_no_img('img/xiayibu.jpg', elseclick=[(806, 508)])
+            if self.is_exists('img/hanghui/battle/shbg.bmp', at=(832, 27, 897, 48)) and \
+                    self.is_exists('img/ui/xiayibu2.bmp', at=(763, 477, 848, 505)):
+                self.lock_no_img('img/ui/xiayibu2.bmp', elseclick=[(806, 508)])
                 break
         self.lock_home()
