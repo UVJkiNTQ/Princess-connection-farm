@@ -19,7 +19,6 @@ from automator_mixins._juqing import JuQingMixin
 from automator_mixins._shop import ShopMixin
 from automator_mixins._tools import ToolsMixin
 from automator_mixins._enhance import EnhanceMixin
-from automator_mixins._huizhan import HuizhanMixin
 from core.MoveRecord import moveset, UnknownMovesetException
 from core.bot import Bot
 from core.log_handler import pcr_log
@@ -31,7 +30,7 @@ from core.valid_task import VALID_TASK, getcustomtask
 
 
 class Automator(HanghuiMixin, LoginMixin, RoutineMixin, ShuatuMixin, JJCMixin, DXCMixin, AsyncMixin,HaoYouMixin,
-                JuQingMixin, EnhanceMixin, ShopMixin, HuizhanMixin):
+                JuQingMixin, EnhanceMixin, ShopMixin):
 
     def __init__(self, address, output_msg_fun: Callable[[dict], Any] = None):
         """
