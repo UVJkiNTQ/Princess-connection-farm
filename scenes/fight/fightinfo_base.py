@@ -21,6 +21,39 @@ class FightInfoBase(PCRMsgBoxBase):
         # 检测编组设定
         self.feature = self.fun_feature_exist(FIGHT_BTN["baochou"])
 
+    def next_map(self):
+        at = (231, 38, 293, 62)
+        sc1 = self.getscreen()
+        while True:
+            self.click(926, 248)
+            time.sleep(0.5)
+            sc2 = self.getscreen()
+            p = self.img_equal(sc1, sc2, at=at)
+            if p < 0.95:
+                break
+            else:
+                sc1 = sc2
+
+    def to_last_map(self, max_tu: int = 15):  # 尽量从1-1开始点
+        at = (231, 38, 293, 62)
+        count = 1
+        sc1 = self.getscreen()
+        while True:
+            self.click(926, 248)
+            time.sleep(0.5)
+            if count == max_tu:
+                self.log.write_log("info", "已到最后一图")
+                return "finish"
+            count += 1
+            self.log.write_log("info", f"在{count}图")
+            sc2 = self.getscreen()
+            p = self.img_equal(sc1, sc2, at=at)
+            if p > 0.95:
+                self.log.write_log("info", "已到最后一图")
+                break
+            else:
+                sc1 = sc2
+
     def exit_me(self):
         def exit_fun():
             self.fclick(1, 1)
@@ -259,6 +292,8 @@ class FightInfoBase(PCRMsgBoxBase):
                     elif isinstance(out, A.LevelUpBox):
                         out.OK()
                         self.start_shuatu()
+                    elif isinstance(out, A.LoveUpScene):
+                        out.skip()
                     elif isinstance(out, A.TuanDuiZhanBox):
                         out.OK()
                     elif isinstance(out, A.AfterFightKKR):

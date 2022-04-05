@@ -4,15 +4,18 @@ from math import floor, inf
 
 from DataCenter import LoadPCRData
 from core.MoveRecord import movevar
-from core.constant import HARD_COORD, NORMAL_COORD, FIGHT_BTN, MAOXIAN_BTN, MAX_MAP, ACTIVITY_COORD, VH_COORD
+from core.constant import HARD_COORD, NORMAL_COORD, FIGHT_BTN, MAOXIAN_BTN, MAX_MAP, ACTIVITY_COORD, VH_COORD, \
+    HANGHUI_BTN, HUODONG_BTN, JUQING_BTN, MAIN_BTN
 from core.constant import USER_DEFAULT_DICT as UDD
 from core.cv import UIMatcher
 from core.log_handler import pcr_log
 from core.pcr_checker import PCRRetry, LockTimeoutError, RetryNow, ContinueNow
 from core.pcr_config import force_as_ocr_as_possible, debug
 from core.valid_task import ShuatuToTuple
+from scenes.fight.fightinfo_base import FightInfoBase
 from scenes.fight.fightinfo_zhuxian import FightInfoZhuXian, FightInfoZhuXianNormal
-from scenes.huodong.huodong_base import HuodongMapBase
+from scenes.huodong.huodong_base import HuodongMapBase, HuodongMenu, FightBianZuHuoDong
+
 from ._shuatu_base import ShuatuBaseMixin
 
 
@@ -411,7 +414,7 @@ class ShuatuMixin(ShuatuBaseMixin):
         return int(strs[0]), int(strs[1])
 
     def tuitu_ocr(self, mode, from_="new", to="max", buy_tili=0, xianding=False, team_order="zhanli", zhiyuan_mode=0,
-                  lose_action="exit",win_without_threestar_is_lose=True,upgrade_kwargs={}, var={}):
+                  lose_action="exit", win_without_threestar_is_lose=True, upgrade_kwargs={}, var={}):
         """
         mode:   0 - Normal; 1 - Hard; 2 - VH （没测过）
         from_:  A-B 或者 new
@@ -433,12 +436,12 @@ class ShuatuMixin(ShuatuBaseMixin):
             D = NORMAL_COORD
             if to == "max":
                 TA = max(D)
-                TB = max(list(D[TA]['left'])+list(D[TA]['right']))
+                TB = max(list(D[TA]['left']) + list(D[TA]['right']))
             else:
-                TA,TB = [int(x) for x in to.split("-")]
-            for aa in range(A,TA+1):
-                for bb in range(B if aa==A else 1,
-                                max(list(D[aa]['left'])+list(D[aa]['right']))+1 if aa<TA else TB+1):
+                TA, TB = [int(x) for x in to.split("-")]
+            for aa in range(A, TA + 1):
+                for bb in range(B if aa == A else 1,
+                                max(list(D[aa]['left']) + list(D[aa]['right'])) + 1 if aa < TA else TB + 1):
                     LST.append(f"{aa}-{bb}-1")
         elif mode == 1:
             if from_ == "new":
@@ -455,7 +458,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                 TA, TB = [int(x) for x in to.split("-")]
             for aa in range(A, TA + 1):
                 for bb in range(B if aa == A else 1,
-                               4 if aa < TA else TB + 1):
+                                4 if aa < TA else TB + 1):
                     LST.append(f"H{aa}-{bb}-1")
         elif mode == 2:
             if from_ == "new":
@@ -472,7 +475,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                 TA, TB = [int(x) for x in to.split("-")]
             for aa in range(A, TA + 1):
                 for bb in range(B if aa == A else 1,
-                               4 if aa < TA else TB + 1):
+                                4 if aa < TA else TB + 1):
                     LST.append(f"VH{aa}-{bb}-1")
         else:
             raise ValueError("mode can only be 0 or 1")
@@ -535,7 +538,7 @@ class ShuatuMixin(ShuatuBaseMixin):
         """
 
         if force_as_ocr_as_possible:
-            self.log.write_log("info","该函数已经用OCR版本重写，自动跳转到tuitu_ocr函数。")
+            self.log.write_log("info", "该函数已经用OCR版本重写，自动跳转到tuitu_ocr函数。")
             self.tuitu_ocr(
                 mode=mode,
                 from_=from_,
@@ -543,8 +546,8 @@ class ShuatuMixin(ShuatuBaseMixin):
                 buy_tili=buy_tili,
                 team_order="dengji",
                 win_without_threestar_is_lose=force_as_ocr_as_possible,
-                lose_action="exit" if auto_upgrade==0 else "upgrade",
-                upgrade_kwargs=dict(do_shuatu=False if auto_upgrade==1 else True),
+                lose_action="exit" if auto_upgrade == 0 else "upgrade",
+                upgrade_kwargs=dict(do_shuatu=False if auto_upgrade == 1 else True),
                 var=var
             )
         else:
@@ -719,25 +722,25 @@ class ShuatuMixin(ShuatuBaseMixin):
             self.setting()
             mv.setflag("set")
         if a == 1 and b < 8:
-            self.log.write_log('info',"1")
+            self.log.write_log('info', "1")
             self.tuitu(0, "1-8", buy_tili=3, clear_tili=False, var=var)
             a, b = getab()
         if a == 1 and b == 8:
             self.auto_upgrade(buy_tili=3, var=var)
         if a == 1 or (a == 2 and b < 5):
-            self.log.write_log('info',"2")
+            self.log.write_log('info', "2")
             self.tuitu(0, "2-5", buy_tili=3, clear_tili=False, var=var)
             a, b = getab()
         if a == 2 and b == 5:
             self.auto_upgrade(buy_tili=3, var=var)
         if a == 1 or (a == 2 and b < 11):
-            self.log.write_log('info',"3")
+            self.log.write_log('info', "3")
             self.tuitu(0, "2-11", buy_tili=3, clear_tili=False, var=var)
             a, b = getab()
         if a == 2 and b == 11:
             self.auto_upgrade(buy_tili=3, var=var)
         if a < 3:
-            self.log.write_log('info',"4")
+            self.log.write_log('info', "4")
             self.tuitu(0, "3-1", buy_tili=3, clear_tili=False, var=var)
         self.clear_tili_info(var)
         mv.clearflags()
@@ -1154,14 +1157,15 @@ class ShuatuMixin(ShuatuBaseMixin):
         mv = movevar(var)
         if _use_daily:
             ds = self.AR.get("daily_status", UDD["daily_status"])
-            var['buy_tili'] = ds.setdefault('buy_tili',0)
+            var['buy_tili'] = ds.setdefault('buy_tili', 0)
         else:
             mv.regflag("normal", {})
             mv.regflag("hard", {})
             mv.regflag("veryhard", {})
             mv.regflag("buy_tili", 0)
             ds = var
-        mv.regflag("upgraded",False)
+        mv.regflag("upgraded", False)
+
         def record_ds(ds):
             # 记录每日推图所用体力，推图记录之类。
             if _use_daily:
@@ -1192,7 +1196,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                     s = s[2:]
                 tg = None
                 if '~' in s:
-                    s,s_right = s.split('~')
+                    s, s_right = s.split('~')
                     if s_right == "inf":
                         tg = inf
                     else:
@@ -1317,12 +1321,12 @@ class ShuatuMixin(ShuatuBaseMixin):
                         self.log.write_log("info", f"无法进入图{m}{a}-{b}！跳过该图。")
                         return "continue"
                 S.clear_initFC()  # 清除可可罗的检测
-                if m in ['H','VH']:
+                if m in ['H', 'VH']:
                     # 碎片目标检测
-                    if tg!=inf:
+                    if tg != inf:
                         first_cnt = M.get_first_item_count()
-                        if first_cnt>=tg:
-                            self.log.write_log("info",f"图{m}{a}-{b}已经有{first_cnt}/{tg}个目标碎片，不刷啦！")
+                        if first_cnt >= tg:
+                            self.log.write_log("info", f"图{m}{a}-{b}已经有{first_cnt}/{tg}个目标碎片，不刷啦！")
                             return "continue"
                 sc = self.getscreen()
                 stars = M.get_upperright_stars(sc)
@@ -1331,7 +1335,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                     # 可以扫荡
                     # 次数判断：对Hard图
                     max_cishu = t  # 目标：刷t次
-                    if m in ["H","VH"]:
+                    if m in ["H", "VH"]:
                         cishu = M.get_cishu(sc)
                         if cishu == 0:
                             # 不能扫荡，没有次数
@@ -1445,7 +1449,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                                 self.click(1, 1)
                             return "continue"
                     # 次数判断：对Hard图
-                    if m in ["H","VH"]:
+                    if m in ["H", "VH"]:
                         cishu = M.get_cishu(sc)
                         if cishu == 0:
                             # 不能扫荡，没有次数
@@ -1529,7 +1533,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                     F = TZ.goto_fight()
                     During = F.get_during()
                     F.set_auto(1, screen=self.last_screen)
-                    F.set_speed(2,max_level=2,screen=self.last_screen)
+                    F.set_speed(2, max_level=2, screen=self.last_screen)
                     state = {"flag": None}
                     last_time = time.time()
                     while True:
@@ -1576,25 +1580,26 @@ class ShuatuMixin(ShuatuBaseMixin):
                         elif lose_action == "upgrade":
                             if var["upgraded"] is False:
                                 self.log.write_log("info", f"战败于{m}{a}-{b}，尝试升级角色再次刷图！")
-                                if team_order not in ['zhanli','dengji','xingshu','shoucang']:
-                                    self.log.write_log("error", f"战败自动升级中，team_order只能为zhanli/dengji/xingshu/shoucang！终止刷图。")
+                                if team_order not in ['zhanli', 'dengji', 'xingshu', 'shoucang']:
+                                    self.log.write_log("error",
+                                                       f"战败自动升级中，team_order只能为zhanli/dengji/xingshu/shoucang！终止刷图。")
                                     self.lock_home()
                                     return "return"
 
-                                self.auto_upgrade(buy_tili=upgrade_kwargs.setdefault("buy_tili",daily_tili),
-                                                  buy_sucai=upgrade_kwargs.setdefault("buy_sucai",True),
-                                                  do_rank=upgrade_kwargs.setdefault("do_rank",True),
-                                                  do_shuatu=upgrade_kwargs.setdefault("do_shuatu",True),
-                                                  do_kaihua=upgrade_kwargs.setdefault("do_kaihua",True),
-                                                  do_zhuanwu=upgrade_kwargs.setdefault("do_zhuanwu",False),
-                                                  count=upgrade_kwargs.setdefault("count",5),
-                                                  sortby=upgrade_kwargs.setdefault("sortby",team_order),
-                                                  getzhiyuan=True if zhiyuan_mode!=0 else False,var=var)
+                                self.auto_upgrade(buy_tili=upgrade_kwargs.setdefault("buy_tili", daily_tili),
+                                                  buy_sucai=upgrade_kwargs.setdefault("buy_sucai", True),
+                                                  do_rank=upgrade_kwargs.setdefault("do_rank", True),
+                                                  do_shuatu=upgrade_kwargs.setdefault("do_shuatu", True),
+                                                  do_kaihua=upgrade_kwargs.setdefault("do_kaihua", True),
+                                                  do_zhuanwu=upgrade_kwargs.setdefault("do_zhuanwu", False),
+                                                  count=upgrade_kwargs.setdefault("count", 5),
+                                                  sortby=upgrade_kwargs.setdefault("sortby", team_order),
+                                                  getzhiyuan=True if zhiyuan_mode != 0 else False, var=var)
 
                                 var["upgraded"] = True
                                 record_ds(ds)
                                 mv.save()
-                                self.log.write_log("info","自动升级结束，重新尝试刷图。")
+                                self.log.write_log("info", "自动升级结束，重新尝试刷图。")
                                 self.restart_this_task()
                             else:
                                 self.log.write_log("info", f"战败于{m}{a}-{b}，已经升级过角色还打不过，放弃啦。")
@@ -1736,7 +1741,7 @@ class ShuatuMixin(ShuatuBaseMixin):
         self.auto_upgrade(buy_tili=buy_tili, do_rank=do_rank, do_shuatu=do_shuatu)
         self.lock_home()
 
-    def daily_shuatu_auto(self,daily_tili=0, xianding=True,
+    def daily_shuatu_auto(self, daily_tili=0, xianding=True,
                           do_kucunshibie=True, do_jueseshibie=True, n=1, max_tu="max", var={}):
         """
         每日刷图，但是基于角色识别和装备识别自动规划要刷的normal图！
@@ -1752,7 +1757,7 @@ class ShuatuMixin(ShuatuBaseMixin):
 
         mv = movevar(var)
         if do_kucunshibie and mv.notflag("kucun"):
-            self.log.write_log("info","开始进行前置库存识别")
+            self.log.write_log("info", "开始进行前置库存识别")
             self.kucunshibie(var=var)
             mv.setflag("kucun")
         if do_jueseshibie and mv.notflag("juese"):
@@ -1763,10 +1768,10 @@ class ShuatuMixin(ShuatuBaseMixin):
         DataCenter.AR = self.AR
         DataCenter.LoadPCRData()
         arg_strs = [f"--n={n}"]
-        if max_tu!="max":
+        if max_tu != "max":
             arg_strs.append(f"--max-tu={max_tu}")
         # arg_str = " ".join(arg_strs)
-        self.log.write_log("info","正在规划最佳刷图方案……")
+        self.log.write_log("info", "正在规划最佳刷图方案……")
         out_sorted, out_map = DataCenter.ZB_ST_ADVICE(arg_strs, verbose=False)
         NMap = []
         for i in out_sorted:
@@ -1844,8 +1849,8 @@ class ShuatuMixin(ShuatuBaseMixin):
             c, cishu_left = MAP.shua_11(cishu_left, team_order, get_zhiyuan)
         self.lock_home()
 
-    def exchange_tfz(self,code="current", entrance_ind="auto",
-                          var=None):
+    def exchange_tfz(self, code="current", entrance_ind="auto",
+                     var=None):
         """
         code: 见scenes/huodng/huodong_manager.py
         entrance_ind：在冒险界面进入活动，设置为"auto"时，自动寻找剧情活动按钮；设置为int时，固定为从右往左数第几个按钮
@@ -1861,7 +1866,7 @@ class ShuatuMixin(ShuatuBaseMixin):
         jiaohuan.exchange_all()
         self.lock_home()
 
-    def shua_hd_boss(self, team_order="none", code="current", entrance_ind="auto", boss_type=None, var=None):
+    def shua_hd_boss(self, team_order="none", code="current", entrance_ind="auto", once=False, boss_type=None, var=None):
         """
         打活动Boss，team_order见shuatu_daily_ocr。
         code: 见scenes/huodng/huodong_manager.py
@@ -1869,8 +1874,241 @@ class ShuatuMixin(ShuatuBaseMixin):
         """
         self.lock_home()
         act_map = self.get_zhuye().goto_maoxian().goto_huodong(code, entrance_ind)
-        act_menu = act_map.goto_menu()
+        act_map.goto_menu()
         self.log.write_log("info", f"开始刷活动Boss,难度{boss_type}")
-        act_menu.shua_Boss(team_order=team_order, boss_type=boss_type)
+        counter = 0
+        while True:
+            if once is True:
+                if counter > 0:
+                    self.log.write_log("info", "打够一次了")
+                    return
+            act_menu = HuodongMenu(self).enter()
+            if boss_type == "N" or boss_type == "n":
+                fi = act_menu.goto_nboss()
+            elif boss_type == "H" or boss_type == "h":
+                fi = act_menu.goto_hboss()
+            elif boss_type == "VH" or boss_type == "vh":
+                fi = act_menu.goto_vhboss()
+            else:
+                self.log.write_log("warning", "错误的boss类型，跳过该任务")
+                return
+
+            # 进入BOSS界面，FI
+
+            screen = act_menu.getscreen()
+            # boss挑战券是否足够
+            if fi.get_bsq_right(screen) == -1:
+                break
+            if fi.check_taofa(screen):
+                # 检查是否打满3次，可以扫荡
+                one_quan = 30
+                if boss_type == "N" or boss_type == "n":
+                    one_quan = 20
+                # 打几次
+                if once is False:
+                    fi.easy_saodang(target_cishu="max", one_quan=one_quan)
+                else:
+                    fi.easy_saodang(target_cishu="1", one_quan=one_quan)
+                act_menu.fclick(1, 1)
+                act_menu.enter()
+                counter += 1
+                break
+            else:
+                # 不满3次，无法扫荡，手工推图
+                fb: FightBianZuHuoDong = act_menu.goto(FightBianZuHuoDong,
+                                                       act_menu.fun_click(HUODONG_BTN["tiaozhan2_on"]))
+                fb.select_team(team_order)
+                zd = fb.goto_zhandou()
+                zd.auto_and_fast(1)
+                during = zd.get_during()
+                time.sleep(1)
+                counter += 1
+
+            while True:
+                out = self.lock_img({
+                    HUODONG_BTN["shadow_return"]: 1,  # 可以看到return的情况
+                    HUODONG_BTN["shadow_help"]: 1,  # 信赖度
+                    HUODONG_BTN["NORMAL_ON"]: 2,  # Normal，在map了
+                    HUODONG_BTN["HARD_ON"]: 2,  # Hard，在map了
+                    JUQING_BTN["caidanyuan"]: 1,  # 剧情菜单
+                    HUODONG_BTN["speaker_box"]: 1,
+                    HUODONG_BTN["taofazheng_btn"]: 3,
+                    HUODONG_BTN["long_next"]: 4,
+                    HUODONG_BTN["short_next"]: 5,
+                    HUODONG_BTN["short_next2"]: 5,
+                    FIGHT_BTN["menu"]: 6,
+
+                }, elseclick=(1, 1), timeout=20, is_raise=False, threshold=0.9)
+
+                if out == 1:
+                    self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=1, timeout=120)
+                    time.sleep(4)
+                    self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=1, timeout=120)
+                    break
+                elif out == 2:
+                    self.click_btn(HUODONG_BTN["return"], until_appear=HUODONG_BTN["taofazheng_btn"])
+                    continue
+                elif out == 3:
+                    break
+                elif out == 4:
+                    self.click_btn(HUODONG_BTN["long_next"])
+                    continue
+                elif out == 5:
+                    self.click(838, 489)
+                    continue
+                elif out == 6:
+                    time.sleep(6)
+                    continue
+                else:
+                    self.fclick(1, 1)
+                    continue
+            self.fclick(1, 1)
         self.lock_home()
 
+    def tui_hd_map(self, diff="N", team_order="none", code="current", entrance_ind="auto", get_zhiyuan=False,
+                   if_full=0, var=None):
+
+        self.lock_home()
+        if not self.check_shuatu():
+            return
+        MAP: HuodongMapBase = self.get_zhuye().goto_maoxian().goto_huodong(code, entrance_ind)
+        if MAP is False:
+            self.lock_home()
+            return
+        self.log.write_log("info",f"类型：{type(MAP)}")
+        XY11 = MAP._check_coord(MAP.XY11)
+        H1 = MAP._check_coord(MAP.HARD_COORD[1])
+        first_time = True
+        while True:
+            if self.check_shuatu() is False:
+                break
+            MAP = HuodongMapBase(self).enter()
+            if diff == "N":
+                MAP.goto_normal()
+            else:
+                MAP.goto_hard()
+            MAP.to_leftdown()
+            if diff == "N":
+                # Normal 难度
+                fi = MAP.click_xy_and_open_fightinfo(*XY11, typ=FightInfoBase)
+                a = fi.to_last_map()
+            else:
+                # Hard难度
+                fi = MAP.click_xy_and_open_fightinfo(*H1, typ=FightInfoBase)
+                a = fi.to_last_map(max_tu=5)
+            if a == "finish" and fi.get_upperright_stars() == 3:
+                self.log.write_log("info", "已完成推图")
+                break
+            else:
+                if first_time:
+                    st = fi.easy_shoushua(team_order=team_order, one_tili=10, max_speed=2, get_zhiyuan=get_zhiyuan,
+                                          if_full=if_full)  # 打完默认回fi
+                    if st == 1:
+                        return
+                    if st == 3:
+                        self.stop_shuatu()
+                        return
+                    first_time = False
+                    continue
+                else:
+                    st = fi.easy_shoushua(team_order="none", one_tili=10, max_speed=2, get_zhiyuan=get_zhiyuan,
+                                          if_full=if_full)
+                    if st == 1:
+                        return
+                    if st == 3:
+                        self.stop_shuatu()
+                        return
+
+                time.sleep(3)
+                self.fclick(1, 1)
+                time.sleep(1)
+                out = self.lock_img({
+                    HUODONG_BTN["shadow_return"]: 1,  # 可以看到return的情况
+                    HUODONG_BTN["shadow_help"]: 1,  # 信赖度
+                    HUODONG_BTN["NORMAL_ON"]: 2,  # Normal，在map了
+                    HUODONG_BTN["HARD_ON"]: 2,  # Hard，在map了
+                    JUQING_BTN["caidanyuan"]: 3,  # 剧情菜单
+                    HUODONG_BTN["speaker_box"]: 1,
+                    HUODONG_BTN["taofazheng_btn"]: 4,
+
+                }, elseclick=(1, 1), timeout=20, is_raise=False, threshold=0.9)
+
+                if out == 1:
+                    self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=1, timeout=120)
+                    HuodongMenu(self).goto_map(MAP)
+                    continue
+                elif out == 2:
+                    continue
+                elif out == 3:
+                    continue
+                elif out == 4:
+                    HuodongMenu(self).goto_map(MAP)
+                    continue
+                else:
+                    self.chulijiaocheng(None)
+                    self.get_zhuye().goto_maoxian().goto_huodong(code, entrance_ind)
+                    continue
+
+        self.fclick(1, 1)
+        self.lock_home()
+
+    def tui_hd_map_normal(self, team_order="none", code="current", entrance_ind="auto", get_zhiyuan=False,
+                          if_full=0, var=None):
+        self.tui_hd_map(diff="N", team_order=team_order, code=code, entrance_ind=entrance_ind, get_zhiyuan=get_zhiyuan,
+                        if_full=if_full)
+
+    def tui_hd_map_hard(self, team_order="none", code="current", entrance_ind="auto", get_zhiyuan=False,
+                        if_full=0, var=None):
+        self.tui_hd_map(diff="H", team_order=team_order, code=code, entrance_ind=entrance_ind, get_zhiyuan=get_zhiyuan,
+                        if_full=if_full)
+
+    def shua_hd_map_normal(self, code="current", entrance_ind="auto", map_id=1, cishu="max", var=None):
+
+        self.lock_home()
+        if not self.check_shuatu():
+            return
+        MAP = self.get_zhuye().goto_maoxian().goto_huodong(code=code, entrance_ind=entrance_ind)
+        if MAP is False:
+            self.lock_home()
+            return
+        XY11 = MAP._check_coord(MAP.XY11)
+        MAP.enter().goto_normal()
+        MAP.to_leftdown()
+        fi = MAP.click_xy_and_open_fightinfo(*XY11, typ=FightInfoBase)
+        if map_id > 1:
+            next_time = map_id - 1
+            for _ in range(next_time):
+                fi.next_map()
+        fi = FightInfoBase(self)
+        s = fi.easy_saodang(one_tili=10, target_cishu=cishu)
+        if s != 0:
+            return
+        # 处理弹窗
+        while True:
+            time.sleep(3)
+            self.fclick(1, 1)
+            time.sleep(1)
+            out = self.lock_img({
+                HUODONG_BTN["shadow_return"]: 1,  # 可以看到return的情况
+                HUODONG_BTN["shadow_help"]: 1,  # 信赖度
+                HUODONG_BTN["NORMAL_ON"]: 2,  # Normal，在map了
+                HUODONG_BTN["HARD_ON"]: 2,  # Hard，在map了
+                JUQING_BTN["caidanyuan"]: 3,  # 剧情菜单
+                HUODONG_BTN["speaker_box"]: 1,
+                HUODONG_BTN["taofazheng_btn"]: 4,
+
+            }, elseclick=(1, 1), timeout=20, is_raise=False, threshold=0.9)
+
+            if out == 1:
+                self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=1, timeout=120)
+                break
+            elif out == 2:
+                break
+            elif out == 3:
+                self.guojuqing(story_type="huodong")
+                break
+            elif out == 4:
+                break
+            else:
+                break
+        self.lock_home()

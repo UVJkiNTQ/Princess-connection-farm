@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Union
 from core.constant import MAIN_BTN, MAOXIAN_BTN, HUODONG_BTN, JUQING_BTN, p
 from core.pcr_checker import LockTimeoutError, PCRRetry, ContinueNow
 from scenes.root.seven_btn import SevenBTNMixin
+from scenes.huodong.huodong_base import HuodongMapBase, HuodongMenu
 
 if TYPE_CHECKING:
     from scenes.zhuxian.zhuxian_normal import ZhuXianNormal
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from scenes.maoxian.tansuo import TanSuoMenu
     from scenes.dxc.dxc_select import DXCSelectA, DXCSelectB
     from scenes.maoxian.diaocha import DiaoChaMenu
-    from scenes.huodong.huodong_base import HuodongMapBase
+
 
 class MaoXian(SevenBTNMixin):
     def __init__(self, *args, **kwargs):
@@ -89,27 +90,29 @@ class MaoXian(SevenBTNMixin):
             # 点击活动图标
             if entrance_ind == "auto":
                 for _ in range(10):
-                    L = self.img_where_all(HUODONG_BTN["jqhd"], threshold=0.8)
+                    L = self.img_where_all(HUODONG_BTN["jqhd"].img, threshold=0.8)
+                    M = self.img_where_all(HUODONG_BTN["fuke"].img, threshold=0.8)
                     time.sleep(0.2)
                     if len(L) > 0:
+                        xx, yy = L[0], L[1]
                         break
-                for _ in range(10):
-                    L = self.img_where_all(HUODONG_BTN["fuke"].img, threshold=0.8, )
-                    time.sleep(0.2)
-                    if len(L) > 0:
+                    elif len(M) > 0:
+                        xx, yy = M[0], M[1]
                         break
                 else:
                     self.log.write_log("error", "未找到活动图标")
                     self._a.lock_home()
                     return False
-                xx, yy = L[0], L[1]
             else:
                 xx, yy = MAIN_BTN["round_btn"][entrance_ind]
+            self.click(xx, yy)
+            time.sleep(6)
             out = self.lock_img({
                 HUODONG_BTN["sjxz"]: 1,  # 数据下载
-                MAP.NORMAL_ON: 2,  # Normal，进入
-                MAP.HARD_ON: 2,  # Hard，进入
+                HUODONG_BTN["NORMAL_ON"]: 2,  # Normal，进入
+                HUODONG_BTN["HARD_ON"]: 2,  # Hard，进入
                 JUQING_BTN["caidanyuan"]: 3,  # 菜单园
+                HUODONG_BTN["shadow_return"]: 4,  # 可以看到return的情况
 
             }, elseclick=(xx, yy), timeout=20, is_raise=False)
 
@@ -125,10 +128,16 @@ class MaoXian(SevenBTNMixin):
                 self.clear_initFC()
                 return MAP(self._a).enter()  # 结束
             elif out == 3:
+                self._a.guojuqing(story_type="huodong")
                 self._a.lock_home()
                 self._a.get_zhuye().goto_maoxian()
                 "GOTO LABEL A"
                 continue
+            elif out == 4:
+                self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=0.2, timeout=180)
+                time.sleep(5)
+                self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=0.2, timeout=180)
+                return HuodongMenu(self._a).enter().goto_map(map_id=MAP)
             else:
                 # out = False
                 self.chulijiaocheng(None)
@@ -136,4 +145,4 @@ class MaoXian(SevenBTNMixin):
                 "GOTO LABEL A"
                 continue
 
-        return self.goto(HuodongMapBase, gotofun=None)
+        return self.goto(MAP, gotofun=None)

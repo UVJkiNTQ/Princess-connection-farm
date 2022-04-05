@@ -887,7 +887,7 @@ class ToolsMixin(BaseMixin):
         output_dict(self.AR.get("juese_info", UDD["juese_info"]))
         self.lock_home()
 
-    def guojuqing(self, story_type=""):
+    def guojuqing(self, story_type="", no_skip=False):
         while True:
             screen = self.getscreen()
             lst = self.img_where_all(img="img/juqing/xuanzezhi_1.bmp", at=(233, 98, 285, 319), screen=screen)
@@ -901,10 +901,14 @@ class ToolsMixin(BaseMixin):
                 self.click_img(img=JUQING_BTN["wuyuyin"].img, screen=screen, at=(410, 277, 553, 452))
                 continue
             # 选择快进剧情
-            if self.is_exists(JUQING_BTN["caidanyuan"], screen=screen):
-                self.click_btn(JUQING_BTN["caidanyuan"], until_appear=(JUQING_BTN["tiaoguo_1"]))
-                # 快进确认弹出
-                self.click_btn(JUQING_BTN["tiaoguo_1"], until_appear=(JUQING_BTN["tiaoguo_2"]))
+            if self.is_exists(JUQING_BTN["caidanyuan"], screen=screen) and no_skip is False:
+                self.click_btn(JUQING_BTN["caidanyuan"], until_appear=(JUQING_BTN["auto"]))
+                if self.is_exists(JUQING_BTN["tiaoguo_1"], method="sq"):
+                    # 快进确认弹出
+                    self.click_btn(JUQING_BTN["tiaoguo_1"], until_appear=(JUQING_BTN["tiaoguo_2"]))
+                else:
+                    no_skip = True
+                    # self.click_btn(JUQING_BTN["auto"],)  # 测试显示不点auto，，点边上更快一点
                 continue
             # 确认快进，包括视频和剧情
             if self.is_exists(JUQING_BTN["tiaoguo_2"], screen=screen):
@@ -915,7 +919,7 @@ class ToolsMixin(BaseMixin):
                 self.click(int(lst[0]), int(lst[1]))
                 continue
 
-            # 三种退出形式
+            # 退出形式
             # 报酬确认 (好感度剧情)
             if self.is_exists(JUQING_BTN["baochouqueren"], at=(433, 73, 523, 100),
                               screen=screen) and story_type == "haogandu":
@@ -945,6 +949,15 @@ class ToolsMixin(BaseMixin):
                 break
             # 兼容信赖度退出检测，不是很稳定，因为点无语音的时候背景也有
             if story_type == "xianlai" and self.is_exists("img/juqing/new_content.bmp", screen=screen, threshold=0.7):
+                self.log.write_log('info', "完成了这段剧情")
+                break
+            # 活动进入
+            if story_type == "huodong" and self.is_exists("img/juqing/guanbi.bmp", screen=screen, ):
+                self.fclick(1, 1)
+                self.log.write_log('info', "完成了这段剧情")
+                break
+            if story_type == "huodong" and self.is_exists("img/huodong/return.bmp", screen=screen, ):
+                self.fclick(1, 1)
                 self.log.write_log('info', "完成了这段剧情")
                 break
             else:
