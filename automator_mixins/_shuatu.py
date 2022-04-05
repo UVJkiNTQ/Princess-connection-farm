@@ -1910,7 +1910,6 @@ class ShuatuMixin(ShuatuBaseMixin):
                 else:
                     fi.easy_saodang(target_cishu="1", one_quan=one_quan)
                 act_menu.fclick(1, 1)
-                act_menu.enter()
                 counter += 1
                 break
             else:
@@ -1920,7 +1919,6 @@ class ShuatuMixin(ShuatuBaseMixin):
                 fb.select_team(team_order)
                 zd = fb.goto_zhandou()
                 zd.auto_and_fast(1)
-                during = zd.get_during()
                 time.sleep(1)
                 counter += 1
 
@@ -1949,6 +1947,8 @@ class ShuatuMixin(ShuatuBaseMixin):
                     self.click_btn(HUODONG_BTN["return"], until_appear=HUODONG_BTN["taofazheng_btn"])
                     continue
                 elif out == 3:
+                    time.sleep(4)
+                    self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=1, timeout=120)
                     break
                 elif out == 4:
                     self.click_btn(HUODONG_BTN["long_next"])
