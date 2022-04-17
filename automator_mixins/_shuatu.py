@@ -1888,7 +1888,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                     HUODONG_BTN["shadow_return"]: 1,  # 可以看到return的情况
                     HUODONG_BTN["shadow_help"]: 1,  # 信赖度
                     HUODONG_BTN["NORMAL_ON"]: 2,  # Normal，在map了
-                    HUODONG_BTN["HARD_ON"]: 2,  # Hard，在map了
+                    HUODONG_BTN["HARD_ON"]: 1,  # Hard，在map了
                     JUQING_BTN["caidanyuan"]: 1,  # 剧情菜单
                     HUODONG_BTN["speaker_box"]: 1,
                     HUODONG_BTN["taofazheng_btn"]: 3,
@@ -2068,14 +2068,14 @@ class ShuatuMixin(ShuatuBaseMixin):
 
                 if out == 1:
                     self.lock_img(HUODONG_BTN["taofazheng_btn"], elseclick=(31, 30), elsedelay=1, timeout=120)
-                    HuodongMenu(self).goto_map(MAP)
+                    HuodongMenu(self).goto_map(type(MAP))
                     continue
                 elif out == 2:
                     continue
                 elif out == 3:
                     continue
                 elif out == 4:
-                    HuodongMenu(self).goto_map(MAP)
+                    HuodongMenu(self).goto_map(type(MAP))
                     continue
                 else:
                     self.chulijiaocheng(None)
