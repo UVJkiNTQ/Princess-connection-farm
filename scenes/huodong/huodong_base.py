@@ -8,7 +8,7 @@ from scenes.fight.fighting_zhuxian import LoveUpScene, HaoYouMsg, FightingDialog
 from scenes.huodong.huodong_fight import BOSS_FightInfoBase
 from scenes.zhuxian.zhuxian_base import ZhuXianBase
 from scenes.scene_base import PCRSceneBase, PossibleSceneList, PCRMsgBoxBase
-from core.constant import p, FIGHT_BTN, HUODONG_BTN, MAIN_BTN, JUQING_BTN
+from core.constant import p, FIGHT_BTN, HUODONG_BTN, MAIN_BTN, JUQING_BTN, JUESE_BTN
 from typing import Union
 
 
@@ -61,6 +61,7 @@ class HuodongMapBase(ZhuXianBase):
     XY11 = None  # Normal(1,1)的坐标，用于刷1-1
     XY21 = None
     XY31 = None
+    HARD_Legacy = True
     HARD_COORD = None  # 大号刷Hard用坐标
     XY_HARD_BOSS = None
     XY_VH_BOSS = None
@@ -69,6 +70,7 @@ class HuodongMapBase(ZhuXianBase):
     N1 = 15
     N2 = 15
     N3 = 15
+    XINLAI = True
 
     def __init__(self, a):
         super().__init__(a)
@@ -146,9 +148,9 @@ class HuodongMapBase(ZhuXianBase):
         time.sleep(1)
         obj = self.d.touch.down(84, 80)
         time.sleep(0.1)
-        obj.move(416, 80)
+        obj.move(600, 80)
         time.sleep(0.8)
-        obj.up(416, 80)
+        obj.up(600, 80)
         time.sleep(1)
 
     @staticmethod
@@ -235,14 +237,23 @@ class HuodongMapBase(ZhuXianBase):
         assert self.HARD_COORD is not None
         for t in tu_order:
             assert t in self.HARD_COORD
+        HARD_Legacy = self.HARD_Legacy
 
         for tu in tu_order:
             self.set_initFC()
             self.goto_hd_hard()
-            XY = self._check_coord(self.HARD_COORD[tu])
-            fi = self.click_xy_and_open_fightinfo(*XY, typ=FightInfoBase)
+            self.to_leftdown()
+            if not HARD_Legacy:
+                H11 = self._check_coord(self.HARD_COORD[1])
+                fi = self.click_xy_and_open_fightinfo(*H11, typ=FightInfoBase)
+                next_time = tu - 1
+                for _ in range(next_time):
+                    fi.next_map()
+            else:
+                XY = self._check_coord(self.HARD_COORD[tu])
+                fi = self.click_xy_and_open_fightinfo(*XY, typ=FightInfoBase)
             self.clear_initFC()
-            out = fi.easy_saodang(target_cishu="max", one_tili=-1, check_cishu=True)
+            out = fi.easy_saodang(target_cishu="max", one_tili=20, check_cishu=True)
             if out == 1:
                 return 1
             elif out == 4:
@@ -264,6 +275,7 @@ class HuodongMapBase(ZhuXianBase):
         """
         XY = self._check_coord(self.XY_VH_BOSS)
         self.goto_hd_hard()
+        self.to_leftdown()
         out = self.lock_img(HUODONG_BTN["bossqsl"], elseclick=XY, elsedelay=2, retry=3, is_raise=False)
         if out is False:
             self.log.write_log("info", "无法进入VHBoss，今天可能已经打过了。")
@@ -329,13 +341,89 @@ class HuodongMenu(PCRSceneBase):
             self._a.restart_this_task()
         return screen
 
+    def hd_juqing(self):
+        self.clear_initFC()
+        self.lock_img(img="img/ui/close_btn_1.bmp", elseclick=(874, 342), elsedelay=3)
+        while True:
+            time.sleep(1)
+            lst = self.img_where_all(img="img/juqing/new_content.bmp", method="sq", at=(245, 98, 320, 442))
+            if len(lst) > 0:
+                x = lst[0] + 383
+                y = lst[1] + 50
+                '''
+                280, 246
+                663, 297
+                '''
+                self.click(x, y)  # 进入剧情
+                time.sleep(1)
+                self._a.guojuqing(story_type="huodong")
+                continue
+            if self.is_exists(JUESE_BTN["lxydjq"]):
+                self._a.guojuqing(story_type="huodong")
+                continue
+            if self.is_exists(JUESE_BTN["lxydjq"].img, at=(394, 73, 564, 100)):
+                self._a.guojuqing(story_type="huodong")
+                continue
+            else:
+                self.log.write_log("info", "无可读剧情")
+                self.fclick(1, 1)
+                break
+
+    def hd_xinlaidu(self):
+        self.clear_initFC()
+        self.click(498, 270)
+        # 角色循环
+        counter = 0  # 下拉次数计数器
+        while True:
+            self.lock_img(HUODONG_BTN["xinlaiduliwu"])
+            time.sleep(1)
+            lst = self.img_where_all(img="img/juqing/new_content.bmp", method="sq", at=(468, 60, 545, 466))
+            if len(lst) > 0:
+                x = lst[0] + 250
+                y = lst[1] + 20
+                self.click(x, y)  # 进入角色信赖度
+                self.lock_no_img(HUODONG_BTN["wanfa"])
+                self.lock_img(HUODONG_BTN["xinlaiduliwu2"])
+                time.sleep(1)
+                # 进入到角色界面了
+                # 点击气泡
+                while True:
+                    time.sleep(1)
+                    lst = self.img_where_all(img="img/juqing/rong.bmp", at=(3, 43, 863, 427))
+                    if len(lst) > 0:
+                        a = lst[0] + 50
+                        b = lst[1] + 30
+                        self.click(a, b)  # 进入剧情
+                        time.sleep(1)
+                        self._a.guojuqing(story_type="xinlai")
+                        self.fclick(1, 1)
+                        continue
+                    else:
+                        self.log.write_log("info", "无未读剧情")
+                        self.click_btn(HUODONG_BTN["return"])
+                        break
+                continue
+            else:
+                if counter > 1:
+                    self.log.write_log("info", "无未读角色")
+                    break
+                time.sleep(2)
+                obj = self.d.touch.down(920, 165)
+                time.sleep(0.1)
+                obj.move(920, 282)
+                time.sleep(0.8)
+                obj.up(923, 282)
+                time.sleep(1)
+                counter += 1
+                continue
+
     def goto_map(self, map_id) -> "HuodongMapBase":
         return self.goto(map_id, self.fun_click(HUODONG_BTN["huodongguanka"]))
 
     def goto_jiaohuan(self) -> "Jiaohuan":
         return self.goto(Jiaohuan, self.fun_click(HUODONG_BTN["taofazheng_btn"]))
 
-    def goto_nboss(self) -> "BOSS_FightInfoBase":
+    def goto_nboss(self, timeout=None) -> "BOSS_FightInfoBase":
         while True:
             a1 = self.img_where_all(img=HUODONG_BTN["nboss"].img, at=(681, 130, 789, 302))
             a2 = self.img_where_all(img=HUODONG_BTN["nboss_en"].img, at=(681, 130, 789, 302))
@@ -351,9 +439,9 @@ class HuodongMenu(PCRSceneBase):
                 continue
             else:
                 break
-        return self.goto(BOSS_FightInfoBase, self.fun_click(a[0], a[1]))
+        return self.goto(BOSS_FightInfoBase, self.fun_click(a[0], a[1]), timeout=timeout)
 
-    def goto_hboss(self) -> "BOSS_FightInfoBase":
+    def goto_hboss(self, timeout=None) -> "BOSS_FightInfoBase":
         time.sleep(2)
         while True:
             a1 = self.img_where_all(img=HUODONG_BTN["hboss"].img, at=(681, 130, 789, 302))
@@ -369,9 +457,9 @@ class HuodongMenu(PCRSceneBase):
                 time.sleep(0.5)
             else:
                 break
-        return self.goto(BOSS_FightInfoBase, self.fun_click(a[0], a[1]))
+        return self.goto(BOSS_FightInfoBase, self.fun_click(a[0], a[1]), timeout=timeout)
 
-    def goto_vhboss(self) -> "BOSS_FightInfoBase":
+    def goto_vhboss(self, timeout=None) -> "BOSS_FightInfoBase":
         while True:
             a1 = self.img_where_all(img=HUODONG_BTN["vhboss"].img, at=(681, 130, 789, 302))
             a2 = self.img_where_all(img=HUODONG_BTN["vhboss_en"].img, at=(681, 130, 789, 302))
@@ -386,38 +474,39 @@ class HuodongMenu(PCRSceneBase):
                 time.sleep(0.5)
             else:
                 break
-        return self.goto(BOSS_FightInfoBase, self.fun_click(a[0], a[1]))
+        return self.goto(BOSS_FightInfoBase, self.fun_click(a[0], a[1]), timeout=timeout)
 
     def get_bonus(self):
-        if self.check_color(fc=[222, 89, 123], bc=[255, 255, 255], xcor=896, ycor=400, color_type="rgb"):
-            self.click_btn(HUODONG_BTN["liwu"], until_appear=HUODONG_BTN["wanchengqingkuang"])
-            self.click(344, 22)  # 每日
-            time.sleep(0.2)
-            self.click(781, 433)  # 收取
-            time.sleep(1)
-            self.click(478, 468)  # 关闭
-            time.sleep(1)
+        # if self.check_color(fc=[222, 89, 123], bc=[255, 255, 255], xcor=896, ycor=400, color_type="rgb"):
+        # 待我找到一个稳定的识别有礼物的办法。礼物上的标数不稳定会跳动。 BY UVJkiNTQ
+        self.click_btn(HUODONG_BTN["liwu"], until_appear=HUODONG_BTN["wanchengqingkuang"])
+        self.click(344, 22)  # 每日
+        time.sleep(0.2)
+        self.click(781, 433)  # 收取
+        time.sleep(1)
+        self.click(478, 468)  # 关闭
+        time.sleep(1)
 
-            self.click(547, 22)  # 普通
-            time.sleep(0.2)
-            self.click(781, 433)  # 收取
-            time.sleep(1)
-            self.click(478, 468)  # 关闭
-            time.sleep(1)
+        self.click(547, 22)  # 普通
+        time.sleep(0.2)
+        self.click(781, 433)  # 收取
+        time.sleep(1)
+        self.click(478, 468)  # 关闭
+        time.sleep(1)
 
-            self.click(710, 22)  # 特别
-            time.sleep(0.2)
-            self.click(781, 433)  # 收取
-            time.sleep(1)
-            self.click(478, 468)  # 关闭
-            time.sleep(1)
+        self.click(710, 22)  # 特别
+        time.sleep(0.2)
+        self.click(781, 433)  # 收取
+        time.sleep(1)
+        self.click(478, 468)  # 关闭
+        time.sleep(1)
 
-            self.click(860, 22)  # 称号
-            time.sleep(0.2)
-            self.click(781, 433)  # 收取
-            time.sleep(1)
-            self.click(478, 468)  # 关闭
-            time.sleep(1)
+        self.click(860, 22)  # 称号
+        time.sleep(0.2)
+        self.click(781, 433)  # 收取
+        time.sleep(1)
+        self.click(478, 468)  # 关闭
+        time.sleep(1)
 
 
 class Jiaohuan(PCRSceneBase):

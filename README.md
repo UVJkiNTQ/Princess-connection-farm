@@ -1,6 +1,6 @@
  <img src="webclient/src/assets/logo.jpg" width = "80%" height = "80%" alt="LOGO" align=center />
 
-# Princess connection 公主连结农场脚本v2.8.20220425
+# Princess connection 公主连结农场脚本v2.8.20220731
 
 ![](https://img.shields.io/badge/license-GPL--3.0-blue)![](https://img.shields.io/badge/opencv-2.0-blue)![](https://img.shields.io/badge/UIAutomator-2-blue)
 
@@ -101,9 +101,9 @@
 
   适合管理，方便依赖升级
 
-  https://www.123pan.com/s/dDG9-Z83WA
+  https://www.123pan.com/s/dDG9-Mc3WA
   
-  提取码:rcUK
+  提取码:mK4h
   
   **安装教程**与**python3.8.10安装包**均在压缩包内
 
@@ -145,7 +145,7 @@
 
 目前来看，雷电4，蓝叠，雷神模拟器均可以使用。一般来说，只要支持adb连接的模拟器都可以使用。
 
-**重要：模拟器分辨率要求540*960**
+**重要：模拟器分辨率要求540*960 DPI为240** 
 
 **重要**：目前关于API部分已经移入 config.ini 中，如何填入请参考目录下的md文件，config.ini在运行main_new.py后自动生成
 
@@ -160,11 +160,11 @@
 |    TG 电报（:+1:）    | :x:          | :heavy_check_mark: | :heavy_check_mark:       | :heavy_check_mark: | :x:                                                   |
 |     QQBot[开发中]     |              |                    |                          |                    |                                                       |
 
-Tips:QQPush机器人经常换号 Wechat在4月底将全部弃用，转Wework
+Tips:QQPush机器人经常换号 ~~Wechat在4月底将全部弃用，转Wework~~
 
-## :taxi:使用方式
+## :taxi:使用方式&帮助
 
-- 环境配置完成后，再检查模拟器分辨率为540*960。确认无误
+- 环境配置完成后，再检查模拟器分辨率为540*960和DPI为240。确认无误
 
 - 使用OCR相关的服务，必须启动app.py。使用2021-01-23后的版本程序默认自动启动app。
 
@@ -234,6 +234,98 @@ Tips:QQPush机器人经常换号 Wechat在4月底将全部弃用，转Wework
 
 <details>
 <summary>更新日志（点击展开）</summary>
+
+2022/07/31 By UVJkiNTQ
+- BUG修复
+  - 再次尝试修复活动切换下一关函数
+  - 增加了一个活动是否存在信赖剧情的开关
+
+2022/07/17 By UVJkiNTQ
+- BUG修复
+  - 修复活动切换下一关函数失效导致重复打1-2的问题
+
+2022/07/15 By CyiceK
+- BUG修复
+  - 改善自动搜寻的搜寻逻辑，修复部分bug
+  - 修复清理pcr缓存失效的bug
+  - 删除码云镜像链接（因为有README中有github的图片外链，审核不通过
+
+2022/07/13 By UVJkiNTQ
+- 惯例更新
+  - 预更新活动至9月中
+  - 主线`36`图
+- BUG修复
+  - 修复活动boss券识别问题，当券特别少的时候
+
+2022/07/08 By TheAutumnOfRice
+- BUG修复
+  - 修复通关地下城OCR`d5`中，非攒TP模式仍关闭auto的BUG
+
+2022/07/07 By UVJkiNTQ
+- 框架更新
+  - Linux兼容适配，理论也支持MacOS。由于监听键盘输入（Keyboard库），Linux下需要root运行。使用Pyenv时，注意先安装Tk库（GUI），再pyenv install 3.8.10。
+
+2022/07/07 By TheAutumnOfRice
+- BUG修复
+  - 修复通关地下城OCR`d5`中，攒TP模式(mode=4)阵容上错的BUG
+  - 修复`hd03`中VH已经打过一次还想试图点进去后会卡死的BUG
+- 功能新增
+  - 在通关地下城OCR`d5`中添加战斗细节参数`fight_detail`，可以控制auto,速度和角色连点，也许可以更好地帮助攒TP。
+- 其它优化
+  - 在主界面上增加对异常处理的警告信息
+
+2022/06/26 By Cyicek
+- BUG修复
+  - 修复登陆界面提示“密码不安全，请立即修改密码”卡住的BUG
+  - 增添国内蓝叠5的支持
+  - venv反人类教程改正
+
+2022/06/25 By UVJkiNTQ
+- 惯例更新
+  - 更新活动（七夕剑客旅情谭 天际川流夏之恋）
+- BUG修复
+  - 修复碎片购买的逻辑BUG
+
+2022/06/16 By UVJkiNTQ
+- 惯例更新
+  - 更新活动（玲奈的彩虹舞台复刻）
+
+2022/06/14 By UVJkiNTQ
+- 惯例更新
+  - 启用35图
+
+2022/06/02 By UVJkiNTQ
+- 框架更新
+  - 修正活动刷H图的兼容问题，刷活动BOSS请使用hd03
+- 惯例更新
+  - 更新主线坐标至繁体中文服进度，短期内不再有变化
+
+2022/05/31 By UVJkiNTQ
+- 惯例更新
+  - 更新活动（不可思议之国的璃乃）
+- BUG修复
+  - 修正UI变动导致的跳过协议失效
+  - 修复战斗结束后卡升级
+  - 修复团队战借人死锁
+
+2022/05/23 By UVJkiNTQ
+- 性能优化
+  - 优化碎片识别，提高识别阈值
+
+2022/05/18 By UVJkiNTQ
+- 惯例更新
+  - 更新活动（将军道中记 白翼的武士）
+
+2022/05/07 By UVJkiNTQ
+- 框架更新
+  - 新增活动任务hd10 获取活动剧情奖励
+  - 新增活动任务hd11 获取活动信赖奖励
+
+2022/04/30 By UVJkiNTQ
+- BUG修复
+  - 修正UI变动导致的免费十连失效
+- 惯例更新
+  - 更新活动（牧场里的四农士 贫穷农场奋斗记）
 
 2022/04/25 By UVJkiNTQ
 - BUG修复

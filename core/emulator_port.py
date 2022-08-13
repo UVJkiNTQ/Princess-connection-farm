@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import sys
 
 import copy
 import gettext
 import json
 import os
-import platform
+# import platform
 import queue
 import re
 import subprocess
@@ -15,6 +16,7 @@ import psutil
 
 from core.log_handler import pcr_log
 from core.pcr_config import adb_dir, emulators_port_interval, emulators_port_list, one_way_search_auto_find_emulator
+from core.safe_u2 import run_adb
 
 emulator_ip = "127.0.0.1"
 emulator_ip2 = "0.0.0.0"
@@ -79,7 +81,7 @@ def check_adb_connectable_by_ports(ports, auto_disconnect=True):
         def run(self) -> None:
             port_now = self.ports_queue.get()
             device_now = "%s:%s" % (emulator_ip, port_now)
-            sh(f"cd {adb_dir} && adb connect {device_now}", timeout=1)
+            run_adb(f"connect {device_now}", timeout=1)
             self.devices_queue.put(device_now)
 
     connet_thread_list = []
@@ -95,7 +97,7 @@ def check_adb_connectable_by_ports(ports, auto_disconnect=True):
     if auto_disconnect:
         for i in range(devices_queue.qsize()):
             device = devices_queue.get()
-            os.system(f"cd {adb_dir} && adb disconnect {device}")
+            run_adb(f"disconnect {device}")
     ports = [int(x.split(':')[1]) for x in result]
     return ports
 
@@ -106,7 +108,7 @@ def sh(command, print_msg=True, timeout=0):
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, start_new_session=True)
 
     format = 'utf-8'
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         format = 'gbk'
 
     try:
@@ -144,7 +146,7 @@ def sh(command, print_msg=True, timeout=0):
 
 def check_adb_connected(devices_queue):
     # check if device is active
-    active_result = sh(f"cd {adb_dir}adb && devices", print_msg=False)
+    active_result = run_adb("devices")
     connected_devices = []
     for i in range(devices_queue.qsize()):
         device = devices_queue.get()
@@ -235,6 +237,7 @@ def get_port(PID, re_rules=None):
     """通过pid获取端口号"""
     # print("get_port run now!")
     i = 0
+    flag = 0
     por = 65599
     cmd = 'netstat -ano | findstr' + ' ' + str(PID)
     # print(cmd)
@@ -250,10 +253,12 @@ def get_port(PID, re_rules=None):
     while True:
         # print(len(first_line))
         # print(i)
+        flag = 0
         ab = first_line[i].replace('\r\n', '')
         cd = ab.split(' ')
         # print(cd[-1])
         # print(cd[0])
+        # print(ab)
 
         if (i < len(first_line) - 1) and (cd[-1] == "0.0.0.0" or cd[-1] == "127.0.0.1"):
             # print(cd[0])
@@ -271,29 +276,53 @@ def get_port(PID, re_rules=None):
                     i += 1
                     continue
 
+            if sys.platform == "win32":
+                adb_connect_info = subprocess.Popen(
+                    f' cd {adb_dir} & adb connect ' + emulator_ip + ':' + str(cd[0]),
+                    shell=True, stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    encoding='utf-8').communicate()[0].split(' ')
             else:
-                adb_connect_info = os.popen(
-                    f' cd {adb_dir} & adb connect ' + emulator_ip + ':' + str(cd[0])).read().split(
-                    ' ')
-                error_str = ["failed", "10068"]
-                # print(adb_connect_info)
-                # if "failed" in os.popen(f' cd {adb_dir} & adb connect ' + emulator_ip + ':' + str(cd[0])).read().split(
-                #         ' '):
-                #     pcr_log('admin').write_log(level='error', message=f"连接模拟器[{emulator_ip + ':' + str(cd[0])}]失败，"
-                #                                                       f"不是这个模拟器,继续查找中...")
-                #     if "failed" in os.popen(f' cd {adb_dir} & adb connect ' + emulator_ip2 + ':' + str(cd[0])).read().split(
-                #             ' '):
-                #         pcr_log('admin').write_log(level='error', message=f"连接模拟器[{emulator_ip2 + ':' + str(cd[0])}]失败，"
-                #                                                           f"不是这个模拟器,继续查找中...")
-                # os.system("taskkill /im adb.exe /f")
-                # print(adb_connect_info)
-                if error_str in adb_connect_info:
-                    _log.write_log(level='error', message=f"连接模拟器[{emulator_ip2 + ':' + str(cd[0])}]失败，"
-                                                          f"不是这个模拟器,继续查找中...")
+                adb_connect_info = subprocess.Popen(
+                    f' adb connect ' + emulator_ip + ':' + str(cd[0]),
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    encoding='utf-8').communicate()[0].split(' ')
+            error_str = ["failed", "10068", "cannot", "already"]
+            for check_str in error_str:
+                if check_str in adb_connect_info:
+                    _log.write_log(level='info', message=f"连接模拟器[{emulator_ip2 + ':' + str(cd[0])}]失败，"
+                                                         f"不是这个模拟器,继续查找中...")
                     i += 1
                     continue
+                elif "connected" in adb_connect_info:
+                    if sys.platform == "win32":
+                        adb_connect_info = subprocess.Popen(
+                            f' cd {adb_dir} & adb devices',
+                            shell=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            encoding='utf-8').communicate()[0].split(' ')
+                    else:
+                        adb_connect_info = subprocess.Popen(
+                            f' adb devices',
+                            shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            encoding='utf-8').communicate()[0].split(' ')
 
-            if emulators_port_interval[0] >= int(cd[0]) >= emulators_port_interval[1]:
+                    # print(adb_connect_info)
+                    if adb_connect_info:
+                        _log.write_log(level='info', message=f"连接模拟器[{emulator_ip2 + ':' + str(cd[0])}]成功，"
+                                                             f"是这个模拟器,查找完毕")
+                        flag = 1
+                    else:
+                        _log.write_log(level='info', message=f"连接模拟器[{emulator_ip2 + ':' + str(cd[0])}]失败，"
+                                                             f"不是这个模拟器,继续查找中...")
+                        i += 1
+                        continue
+
+            if emulators_port_interval[0] >= int(cd[0]) >= emulators_port_interval[1] and flag == 1:
                 # print(cd)
                 if emulators_port_list:
                     if int(cd[0]) in emulators_port_list:
