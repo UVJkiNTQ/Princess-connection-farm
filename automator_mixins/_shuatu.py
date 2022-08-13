@@ -200,7 +200,7 @@ class ShuatuMixin(ShuatuBaseMixin):
 
         self.log.write_log("info", f"即将推图：{lst}")
         self.shuatu_daily_ocr(lst, zero_star_action="do", lose_action="exit", win_without_threestar_is_lose=False,
-                              zhiyuan_mode=zhiyuan_mode, _use_daily=False, var=var)
+                              team_order="1-1" ,zhiyuan_mode=zhiyuan_mode, _use_daily=False, var=var)
 
     def jierentuitu_normal(self, max_tu, zhiyuan_mode=-1, max_do=2, var={}):
         if not self.check_shuatu():
@@ -1465,7 +1465,7 @@ class ShuatuMixin(ShuatuBaseMixin):
                             TZ.clear_team()
                         else:
                             TZ.select_team(team_order)
-                        code = TZ.get_zhiyuan()
+                        code = TZ.get_zhiyuan(if_full=4)
                         if code > 0:
                             self.log.write_log("warning", f"借人出现奇怪的错误 【CODE={code}】，不知所措，自己推图！")
                             if TZ.get_fight_current_member_count() < 5:
