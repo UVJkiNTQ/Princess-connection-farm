@@ -295,6 +295,7 @@ class FightInfoBase(PCRMsgBoxBase):
             out = D.check()
             if isinstance(out, D.FightingWinZhuXian):
                 self.log.write_log("info", f"战胜了！")
+                time.sleep(1.5)
                 out.next()
                 A = out.get_after()
                 while True:
