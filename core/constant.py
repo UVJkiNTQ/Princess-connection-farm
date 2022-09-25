@@ -1312,6 +1312,7 @@ ZHUXIAN_ID = {
     35: p(img="img/zhuxian/35L.bmp", at=(61, 57, 203, 76)),
     36: p(img="img/zhuxian/36L.bmp", at=(60, 57, 162, 76)),
     37: p(img="img/zhuxian/37L.bmp", at=(88, 58, 161, 74)),
+    38: p(img="img/zhuxian/38L.bmp", at=(63, 57, 179, 76)),
 }
 
 MAX_MAP = max(ZHUXIAN_ID)
@@ -1359,6 +1360,10 @@ ZHUXIAN_WNHP_ID = {
     36: p(img="img/zhuxian/36R.bmp", at=(177, 55, 215, 77)),
     37: p(img="img/zhuxian/37R.bmp", at=(181, 60, 211, 73)),
 }
+ZHUXIAN_LTSDY_ID = {
+    38: p(img="img/zhuxian/38R.bmp", at=(196, 60, 232, 76))
+    # 39: p(img="img/zhuxian/37R.bmp", at=(181, 60, 211, 73)),
+}
 ZHUXIAN_SECOND_ID = {
     (18, 19): ZHUXIAN_XXXYY_ID,
     (20, 21): ZHUXIAN_KSTLYSL_ID,
@@ -1370,6 +1375,7 @@ ZHUXIAN_SECOND_ID = {
     (32, 33): ZHUXIAN_FSJYSL_ID,
     (34, 35): ZHUXIAN_DKSTYSY_ID,
     (36, 37): ZHUXIAN_WNHP_ID,
+    # (38, 39): ZHUXIAN_LTSDY_ID,
 }
 
 NORMAL_COORD = {
@@ -2124,22 +2130,22 @@ NORMAL_COORD = {
     },
     38: {
         "right": {
-            14: p(810, 336, name="38-14"),
-            13: p(647, 351, name="38-13"),
-            12: p(707, 230, name="38-12"),
-            11: p(570, 193, name="38-11"),
-            10: p(431, 228, name="38-10"),
-            9: p(462, 353, name="38-9"),
-            8: p(328, 336, name="38-8"),
+            14: p(814, 223, name="38-14"),
+            13: p(765, 351, name="38-13"),
+            12: p(655, 291, name="38-12"),
+            11: p(531, 252, name="38-11"),
+            10: p(384, 283, name="38-10"),
+            9: p(450, 395, name="38-9"),
+            8: p(291, 378, name="38-8"),
         },
         "left": {
-            7: p(642, 363, name="38-7"),
-            6: p(605, 257, name="38-6"),
-            5: p(452, 245, name="38-5"),
-            4: p(394, 359, name="38-4"),
-            3: p(311, 255, name="38-3"),
-            2: p(202, 326, name="38-2"),
-            1: p(164, 189, name="38-1"),
+            7: p(616, 308, name="38-7"),
+            6: p(516, 383, name="38-6"),
+            5: p(467, 260, name="38-5"),
+            4: p(355, 227, name="38-4"),
+            3: p(229, 277, name="38-3"),
+            2: p(295, 405, name="38-2"),
+            1: p(162, 422, name="38-1"),
         },
     },
     39: {
