@@ -32,7 +32,7 @@ class BOSS_FightInfoBase(PCRMsgBoxBase):
         self.check_ocr_running()
         if screen is None:
             screen = self.getscreen()
-        at = (843, 418, 877, 431)
+        at = (836, 416, 876, 432)
         out = self.ocr_int(*at, screen_shot=screen)
         return out
 
