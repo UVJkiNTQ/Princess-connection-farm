@@ -1,6 +1,6 @@
  <img src="webclient/src/assets/logo.jpg" width = "80%" height = "80%" alt="LOGO" align=center />
 
-# Princess connection 公主连结农场脚本v2.8.20221201
+# Princess connection 公主连结农场脚本v2.8.20221206
 
 ![](https://img.shields.io/badge/license-GPL--3.0-blue)![](https://img.shields.io/badge/opencv-2.0-blue)![](https://img.shields.io/badge/UIAutomator-2-blue)
 
@@ -293,6 +293,16 @@ Tips:QQPush机器人经常换号 ~~Wechat在4月底将全部弃用，转Wework~~
 
 <details>
 <summary>更新日志（点击展开）</summary>
+
+2022/12/06 By Cyicek
+
+- BUG修复
+  - 卡短图协议问题，增加长按点击坐标（808, 324）
+
+2022/12/02 By TheAutumnOfRice
+
+- BUG修复
+  - 将chulijiaocheng的timeout改为999，不会再有因为超过90秒的动画导致重启的问题了。
 
 2022/12/01 By TheAutumnOfRice
 
